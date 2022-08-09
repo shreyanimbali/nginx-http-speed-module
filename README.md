@@ -1,1 +1,1 @@
-# nginx-http-speed-detection-module
+# nginx-http-speed-header-module
