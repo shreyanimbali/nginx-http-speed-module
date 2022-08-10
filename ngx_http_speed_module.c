@@ -45,16 +45,16 @@ ngx_module_t ngx_http_speed_module = {
 
 static ngx_int_t ngx_http_speed_handler(ngx_http_request_t *r){
    ngx_table_elt_t *h;
-   h = (ngx_table_elt_t *)ngx_list_push(&r->headers_out.headers);
+   h = ngx_list_push(&r->headers_out.headers);
    if (h == NULL) {
-         return NGX_HTTP_INTERNAL_SERVER_ERROR;
+         return NGX_ERROR;
    }
 
-   h->hash = 1;
    h->key.len = sizeof("Speed") - 1;
    h->key.data = (u_char *) "Speed";
    h->value.len = sizeof("speed") - 1;
    h->value.data = (u_char *) "speed";
+   h->hash = 1;
 
    ngx_http_send_header(r);
 
