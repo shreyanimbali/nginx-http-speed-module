@@ -2,6 +2,7 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <stdio.h>
+#include <math.h>
 
 static char *ngx_http_speed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
@@ -44,30 +45,42 @@ ngx_module_t ngx_http_speed_module = {
 };
 
 static ngx_int_t ngx_http_speed_handler(ngx_http_request_t *r){
-   ngx_table_elt_t *h;
-   h = ngx_list_push(&r->headers_out.headers);
-   if (h == NULL) {
-         return NGX_ERROR;
-   }
+    ngx_table_elt_t *h;
+    h = ngx_list_push(&r->headers_out.headers);
+    if (h == NULL) {
+          return NGX_ERROR;
+    }
+    u_char *ngx_hello_world = r->args.data;
+    size_t sz = r->args.len;
 
-   h->key.len = sizeof("Speed") - 1;
-   h->key.data = (u_char *) "Speed";
-   h->value.len = sizeof("speed") - 1;
-   h->value.data = (u_char *) "speed";
-   h->hash = 1;
+    r->headers_out.content_type.len = strlen("text/html");
+    r->headers_out.content_type.data = (u_char *) "text/html";
+    r->headers_out.status = NGX_HTTP_OK;
+    r->headers_out.content_length_n = sz;
+    h->hash = 1;
+  
+    h->key.len = sizeof("Speed (in kbps)") - 1;
+    h->key.data = (u_char *) "Speed (in kbps)";
+    h->value.len = sz;
+    h->value.data = ngx_hello_world;
+    ngx_http_send_header(r);
 
-   ngx_http_send_header(r);
+    ngx_buf_t    *b;
+    ngx_chain_t   *out;
 
-   ngx_buf_t    *b;
-   ngx_chain_t   *out;
+    b = ngx_calloc_buf(r->pool);
 
-   b = ngx_calloc_buf(r->pool);
+    out = ngx_alloc_chain_link(r->pool);
+    out->buf = b;     
+    out->next = NULL;
 
-   out = ngx_alloc_chain_link(r->pool);
-   out->buf = b;
-   out->next = NULL;
-
-   return ngx_http_output_filter(r, out);
+    b->pos = ngx_hello_world;
+    b->last = ngx_hello_world + sz;
+    b->memory = 1;
+    b->last_buf = 1;
+    h->hash = 1;
+    ngx_http_send_header(r);
+    return ngx_http_output_filter(r, out);
 }
 
 static char *ngx_http_speed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf){
