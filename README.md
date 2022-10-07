@@ -18,3 +18,8 @@ is an array of function references. Even if you do not need this array of functi
 
 # ngx_http_speed_module : 
 is an array of definitions for the module which tells us where the above two arrays are.
+
+# ngx_http_speed_handler : 
+This is the main function in our module. Note: And handler function must always have a return type of ngx_int_t and should have only one argument, which is a pointer of the type ngx_http_request_t.
+
+After sending the custom made and set headers, we set the body of our response using ngx_buf_t (buffer) and ngx_chain_t (chain link). The body is then sent using ngx_http_output_filter(r,out).
